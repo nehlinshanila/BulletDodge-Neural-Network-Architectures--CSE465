@@ -1,0 +1,22 @@
+Reinforcement learning focuses on teaching agents through tiral and error
+learns on the basis of rewards it gets
+exploration and exploitation tradeoff
+by actively engaing with the environment
+
+CONCEPTS:
+-agents
+-environment
+-actions
+-reward + observation
+
+
+1. import dependencies
+2. load and understand environment
+3. train an rl model
+4. save and reload model'
+5. evaluation
+6. test moiedl
+7. viewing logs in tensorboard
+8. Adding callback to the training stage
+9. changing policies
+10. using an alternate algorithm
