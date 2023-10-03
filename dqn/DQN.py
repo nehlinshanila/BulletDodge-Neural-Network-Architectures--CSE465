@@ -1,224 +1,204 @@
 import gymnasium as gym
+import numpy as np
 from gym import spaces
 import pygame
-import numpy as np
 
-# stables baselines3 function
-class PredatorPreyEnv:
-    def __init__(self, grid_size=5):
-        # Initialize Pygame window and other environment attributes here
-        pygame.init()
-        self.screen_width = 400
-        self.screen_height = 400
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        pygame.display.set_caption('Predator-Prey Environment')
+class PredatorPreyENV(gym.Env):
+    # The primary purpose of PredatorPreyENV is to store configuration settings and sensitive information
+    #  Python class named PredatorPreyENV that inherits from the custom gym.Env
+    def __init__(self, screen_width=800, screen_height=600):
+        super(PredatorPreyENV, self).__init__()
 
-        self.grid_size = grid_size  # Added grid_size as a parameter
+        # Define the screen dimensions
+        self.screen_width = screen_width
+        self.screen_height = screen_height
 
-        # Define continuous action spaces for predator and prey
-        self.action_space_predator = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
-        self.action_space_prey = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        # defining the agent policies
+        self.blue_dot_radius = 40
+        self.direction_line_length = 40
+        self.blue_dot_health = 50
+        self.red_dot_health = 50
 
-        # Use dtype=np.float32 for the observation space
-        self.observation_space = spaces.Box(low=np.zeros((self.grid_size, self.grid_size), dtype=np.float32),
-                                            high=np.ones((self.grid_size, self.grid_size), dtype=np.float32),
+        # Define 4 discreet action space (left, right, up, down)
+        self.action_space = spaces.Discrete(4)
+
+        # Define observation space (positions of blue dot and red dot)
+        self.observation_space = spaces.Box(low=np.array([0, 0, 0, 0], dtype=np.float32), high=np.array(
+            [self.screen_width / 2, self.screen_height, self.screen_width, self.screen_height], dtype=np.float32),
                                             dtype=np.float32)
 
-        self.grid = np.zeros((self.grid_size, self.grid_size), dtype=int)
-        self.predator_position = [0.5, 0.5]  # Corrected variable name
-        self.prey_position = [self.grid_size - 0.5, self.grid_size - 0.5]  # Corrected variable name
-        self.obstacle_pos = [[2, 2], [3, 3]]
+        # Initialize the pygame window
+        pygame.init()
+        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
+        pygame.display.set_caption('Dots Moving Environment')
 
-        self.max_steps = 20
-        self.current_step = 0
+        # Initialize the positions of the blue and red dots
+        # self.blue_dot_pos = np.array([self.screen_width / 4, self.screen_height / 2], dtype=np.float32)
+        self.blue_dot_pos = np.array([self.screen_width / 4, self.screen_height / 2], dtype=np.float32)
+
+        # self.red_dot_pos = np.array([3 * self.screen_width / 4, self.screen_height / 2], dtype=np.float32)
+        self.red_dot_pos = np.array([3 * self.screen_width / 4, self.screen_height / 2], dtype=np.float32)
+
+        # Define grid line properties
+        self.grid_color = (210, 210, 210)
+        self.grid_spacing = 40  # Adjust this value to change the grid spacing
+
+        pygame.font.init()
+        self.font = pygame.font.Font(None, 36)
+
+        self.total_reward = 0
+    #     keep track of the cumulative reward earned by the agent as it interacts with the environment
 
     def reset(self):
-        self.grid = np.zeros((self.grid_size, self.grid_size), dtype=np.int)
-        initial_position = [self.grid_size // 2, self.grid_size // 2]  # Middle of the grid
-        self.predator_position = initial_position
-        self.prey_position = initial_position
-        self.obstacle_pos = [[2, 2], [3, 3]]  # You can adjust obstacle positions if needed
-        self.current_step = 0
-        self.place_objects()
-        return self.grid.copy()
+        # Reset the positions of the blue and red dots at start of each episodes
+        # self.blue_dot_pos = np.array([0, 0], dtype=np.float32)
+        self.blue_dot_pos = np.array([self.screen_width / 4, self.screen_height / 2], dtype=np.float32)
 
-    def step(self, actions):
-        # Calculate the distance between the predator and prey
-        distance = np.linalg.norm(np.array(self.predator_position) - np.array(self.prey_position))
+        # self.red_dot_pos = np.array([3 * self.screen_width / 4, self.screen_height / 2], dtype=np.float32)
 
-        if distance < 0.1:  # You can adjust this distance threshold as needed
-            # If the predator is very close to the prey, move the prey away
-            prey_speed = 0.03  # Adjust the speed as needed
-            random_movement = np.random.uniform(-1, 1, size=(2,))
-            random_movement /= np.linalg.norm(random_movement)
-            new_prey_position = np.array(self.prey_position) + random_movement * prey_speed
-            new_prey_position = np.clip(new_prey_position, [0, 0], [self.grid_size - 1, self.grid_size - 1])
-            self.prey_position = new_prey_position.tolist()
+        # Reset the position of the red dot to the middle of the screen
+        # self.red_dot_pos = np.array([self.screen_width / 2, self.screen_height / 2], dtype=np.float32)
+        self.red_dot_pos = np.array([3 * self.screen_width / 4, self.screen_height / 2], dtype=np.float32)
 
-        # Calculate the direction from the predator to the prey
-        direction = np.array(self.prey_position) - np.array(self.predator_position)
+        self.blue_dot_health = 50
+        self.total_reward = 0
+        return np.concatenate([self.blue_dot_pos, self.red_dot_pos])
 
-        # Normalize the direction vector to have unit length
+    # This function essentially describes how the blue and red dots interact
+    # based on the selected actions, handle collisions, and update their positions and rewards within the environment.
+    def step(self, action):  #per second 1 frame pass what happens determines step function
+        # truncated == false
+        # Define the movement speed
+        # self used to access variables
+        move_speed = 0.8   #blue
+
+        # Separate the action for blue and red dots
+        action_blue_dot, action_red_dot = action
+        # POLICIES
+        if action_blue_dot == 0:  # Move blue dot left
+            self.blue_dot_pos[0] -= move_speed
+        elif action_blue_dot == 1:  # Move blue dot right
+            self.blue_dot_pos[0] += move_speed
+        elif action_blue_dot == 2:  # Move blue dot up
+            self.blue_dot_pos[1] -= move_speed
+        elif action_blue_dot == 3:  # Move blue dot down
+            self.blue_dot_pos[1] += move_speed
+
+        move_speed = 0.1   # red
+
+        # Calculate the direction vector from the red dot to the blue dot by subtracting
+        direction = self.blue_dot_pos - self.red_dot_pos
+
+        # Normalize the direction vector by dividing the vector by its magnitude (length) to turn it into a unit vector
         direction /= np.linalg.norm(direction)
+        # normalized vector (direction) indicates the direction from the red dot to the blue dot.
+        #print("Direction: ", direction)
+        distance_between_centers = np.linalg.norm(self.blue_dot_pos - self.red_dot_pos)
+        # calculates the Euclidean distance between the centers of the blue and red dots,
+        # measures how far apart the two dots are in terms of pixel distance.
 
-        # Calculate the new position of the predator by moving it towards the prey
-        predator_speed = 0.05  # Adjust the speed as needed
-        new_predator_position = np.array(self.predator_position) + direction * predator_speed
+        # radii for collision detection. The red_dot_radius is set to be 15 pixels smaller than the blue_dot_radius.
+        blue_dot_radius = self.blue_dot_radius
+        red_dot_radius = blue_dot_radius - 15
+        reward = 0
+        done = False
 
-        # Ensure the new position stays within the grid boundaries
-        new_predator_position = np.clip(new_predator_position, [0, 0], [self.grid_size - 1, self.grid_size - 1])
+        # Check if the dots collide with each other
+        # checking if the distance between the centers of the blue and red dots (distance_between_centers)
+        # is less than the sum of their radii (blue_dot_radius + red_dot_radius)
+        if distance_between_centers < blue_dot_radius + red_dot_radius:
+            # Separate the dots by moving the red dot away from the blue dot
+            self.red_dot_pos -= -50.0 + move_speed * direction
+            self.blue_dot_health -= self.red_dot_attack_dmg
+            if(self.blue_dot_health <= 0):
+                done = True
+            reward -= 5
+            #print("collision")
 
-        # Update the predator's position
-        self.predator_position = new_predator_position.tolist()
+        else:
+            # Move the red dot towards the blue dot with a fixed speed
+            self.red_dot_pos += move_speed * direction
 
-        # Check for collisions with obstacles and boundaries (you can keep your collision logic here)
+        # Clip blue dot position to stay within the first half of the screen
+        self.blue_dot_pos[0] = np.clip(self.blue_dot_pos[0], 0, self.screen_width)
+        self.blue_dot_pos[1] = np.clip(self.blue_dot_pos[1], 0, self.screen_height)
 
-        # Update the grid to reflect the new positions
+        # Clip red dot position to stay within the entire screen
+        self.red_dot_pos = np.clip(self.red_dot_pos, [0, 0], [self.screen_width, self.screen_height])
 
-        self.grid = np.zeros((self.grid_size, self.grid_size), dtype=int)
-        self.place_objects()
+        # Define a simple reward function (e.g., distance between the two dots)
+        # reward = -np.linalg.norm(self.blue_dot_pos - self.red_dot_pos)
+        self.total_reward += reward
 
-        # Calculate rewards and check termination conditions
-        reward = self.calculate_reward()
-        done = self.current_step >= self.max_steps
-        self.current_step += 1
+        # Check if the dots are close to each other (you can adjust the distance threshold as needed)
+        # done = np.linalg.norm(self.blue_dot_pos - self.red_dot_pos) < 10
+        return np.concatenate([self.blue_dot_pos, self.red_dot_pos]), reward, done, {}
+    # done flag indicating the end of the episode, and an empty dictionary ({}) for additional information
 
-        return self.grid.copy(), reward, done, {}
+    def display_total_reward(self):
+        text_surface = self.font.render(f"Reward: {self.total_reward: .2f} Blue Health: {self.blue_dot_health}", True, (0, 0, 0))
+        # the reward and blue dot health values text
+        text_rect = text_surface.get_rect()
+        # position the text on the pygame window.
+        text_rect.center = (self.screen_width - 200, 10)
+        self.screen.blit(text_surface, text_rect)
+    # The blit method is used to draw the text surface (text_surface) onto the pygame window (self.screen)
 
-    def render(self, mode='human'):
-        if mode == 'human':
-            # Clear the screen
-            self.screen.fill((255, 255, 255))
+    # render function is responsible for creating a visual representation of the environment
+    def render(self, action_blue, action_red):
+        # Clear the screen
+        self.screen.fill((229, 222, 248))
 
-            # Draw the grid
-            cell_size = self.screen_width // self.grid_size
-            for x in range(0, self.screen_width, cell_size):
-                pygame.draw.line(self.screen, (0, 0, 0), (x, 0), (x, self.screen_height))
-            for y in range(0, self.screen_height, cell_size):
-                pygame.draw.line(self.screen, (0, 0, 0), (0, y), (self.screen_width, y))
+        # Draw grid lines
+        for x in range(0, self.screen_width, self.grid_spacing):
+            pygame.draw.line(self.screen, self.grid_color, (x, 0), (x, self.screen_height), 1)
+        for y in range(0, self.screen_height, self.grid_spacing):
+            pygame.draw.line(self.screen, self.grid_color, (0, y), (self.screen_width, y), 1)
 
-            # Draw predator and prey as circles
-            predator_color = (255, 0, 0)
-            prey_color = (0, 0, 255)
+        # Draw blue dot
+        pygame.draw.circle(self.screen, (141,144,226), (int(self.blue_dot_pos[0]), int(self.blue_dot_pos[1])), self.blue_dot_radius)
 
-            predator_x, predator_y = self.predator_position
-            prey_x, prey_y = self.prey_position
+        # Draw red dot
+        pygame.draw.circle(self.screen, (158, 50, 90), (int(self.red_dot_pos[0]), int(self.red_dot_pos[1])), self.blue_dot_radius - 10)
 
-            # Draw predator as a circle
-            predator_radius = cell_size // 4  # Smaller radius
-            pygame.draw.circle(self.screen, predator_color,
-                               (int(predator_x * cell_size + cell_size // 2),
-                                int(predator_y * cell_size + cell_size // 2)),
-                               predator_radius)
+        # calculating the position of facing direction lines
+        blue_dot_direction_end = tuple(map(int, self.blue_dot_pos + self.direction_line_length * action_blue))
+        red_dot_direction_end = tuple(map(int, self.red_dot_pos + self.direction_line_length * action_red))
 
-            # Draw prey as a circle
-            prey_radius = cell_size // 4  # Smaller radius
-            pygame.draw.circle(self.screen, prey_color,
-                               (int(prey_x * cell_size + cell_size // 2), int(prey_y * cell_size + cell_size // 2)),
-                               prey_radius)
+        # direction line draw
+        pygame.draw.line(self.screen, (0, 0, 255), tuple(map(int, self.blue_dot_pos)), blue_dot_direction_end, 2)
+        pygame.draw.line(self.screen, (255, 0, 0), tuple(map(int, self.red_dot_pos)), red_dot_direction_end, 2)
 
-            # Update the display
-            pygame.display.flip()
+        self.display_total_reward()
 
-        elif mode == 'rgb_array':
-            # Render to an RGB array (useful for video recording or further processing)
-            # Create a copy of the screen surface as a NumPy array
-            frame = pygame.surfarray.array3d(pygame.display.get_surface())
-            return frame
-
-        elif mode == 'ansi':
-            # Return a text-based representation (not applicable for Pygame)
-            pass
+        # Update the display
+        pygame.display.update()
 
     def close(self):
         pygame.quit()
 
-    def place_objects(self):
-        # Clear the grid
-        self.grid = np.zeros((self.grid_size, self.grid_size), dtype=int)
 
-        # Place predator randomly on the grid
-        predator_x = np.random.uniform(0, self.grid_size)
-        predator_y = np.random.uniform(0, self.grid_size)
-        self.predator_position = [predator_x, predator_y]
-        self.grid[int(predator_y)][int(predator_x)] = 1  # Use a unique value for the predator
+# if __name__ == "__main__":
+#     env = PredatorPreyENV()
+#     # observation = env.reset()
+#     done = True
 
-        # Place prey randomly on the grid (initially far from the predator)
-        prey_x = np.random.uniform(0, self.grid_size)
-        prey_y = np.random.uniform(0, self.grid_size)
-        while np.linalg.norm(np.array([prey_x, prey_y]) - np.array([predator_x, predator_y])) < 2:
-            prey_x = np.random.uniform(0, self.grid_size)
-            prey_y = np.random.uniform(0, self.grid_size)
-        self.prey_position = [prey_x, prey_y]
-        self.grid[int(prey_y)][int(prey_x)] = 2  # Use a unique value for the prey
+#     while True:
+#         # env.render()
+#         # Control logic for the blue dot (random actions)
+#         if done:
+#             observation = env.reset()
+#             done = False
+#         action_blue = env.action_space.sample()
 
-        # Place obstacles on the grid (if needed)
-        for obstacle_x, obstacle_y in self.obstacle_pos:
-            self.grid[obstacle_y][obstacle_x] = 3  # Use a unique value for obstacles
+#         # No action for the red dot (it moves automatically towards the blue dot)
+#         action_red = env.blue_dot_pos - env.red_dot_pos
 
-    def move_agent(self, agent_position, velocity):
-        # Calculate the new position based on the velocity
-        new_x = agent_position[0] + velocity[0]
-        new_y = agent_position[1] + velocity[1]
+#         action_red /= np.linalg.norm(action_red)
 
-        # Ensure the new position stays within the grid boundaries
-        new_x = np.clip(new_x, 0, self.grid_size - 1)
-        new_y = np.clip(new_y, 0, self.grid_size - 1)
+#         action = [action_blue, action_red]
 
-        # Return the new position
-        return [new_x, new_y]
+#         observation, reward, done, _ = env.step(action)
+#         env.render(action_blue, action_red)
 
-    def check_collisions(self):
-        # Check for collisions between the predator and obstacles
-        for obstacle_x, obstacle_y in self.obstacle_pos:
-            if np.array_equal(self.predator_position, [obstacle_x, obstacle_y]):
-                # Handle collision between predator and obstacle (e.g., reset predator position)
-                self.predator_position = [0.5, 0.5]  # Reset predator position to the center
-
-        # Check for collisions between the prey and obstacles (if needed)
-        # You can implement this part if your prey should avoid obstacles
-
-        # Check for collisions between the predator and the prey
-        if np.array_equal(self.predator_position, self.prey_position):
-            # Handle collision between predator and prey (e.g., reset prey position)
-            self.prey_position = [self.grid_size - 0.5, self.grid_size - 0.5]  # Reset prey position
-
-        # You can add more collision checks as needed
-
-    def calculate_reward(self):
-        # Define your reward logic here
-        # Example: Reward the predator for catching the prey and penalize collisions with obstacles
-
-        reward = 0  # Initialize the reward
-
-        # Check if the predator has caught the prey
-        if np.array_equal(self.predator_position, self.prey_position):
-            reward += 1  # Reward for catching the prey
-
-        # Optionally, you can penalize the predator for colliding with obstacles
-        for obstacle_x, obstacle_y in self.obstacle_pos:
-            if np.array_equal(self.predator_position, [obstacle_x, obstacle_y]):
-                reward -= 0.1  # Penalize for colliding with an obstacle
-
-        return reward
-
-
-if __name__ == "__main__":
-    env = PredatorPreyEnv(grid_size=5)
-    running = True
-
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        # Your game logic here
-        actions = [0.1, 0.1]  # Replace with actual actions
-        obs, reward, done, _ = env.step(actions)
-
-        env.render()
-
-        # Add a delay to control the frame rate (e.g., 60 frames per second)
-        pygame.time.delay(100)  # Delay for approximately 16 milliseconds (1000 ms / 60 FPS)
-
-    pygame.quit()
+#     env.close()
