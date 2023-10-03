@@ -18,6 +18,7 @@ class DotEnv(gym.Env):
         self.game_speed = 1
         self.test_health = 10
 
+
         # for Blue dot
         self.blue_dot_radius = 20
         self.blue_dot_health = 5
@@ -26,6 +27,7 @@ class DotEnv(gym.Env):
         self.blue_dot_turn_rate = None
         self.blue_dot_stamina = 50
         self.blue_dot_stamina_recovery_rate = 15
+        self.blue_dot_pos_prev = None
 
         # for Red dot
         self.red_dot_radius = self.blue_dot_radius - 10
@@ -70,13 +72,11 @@ class DotEnv(gym.Env):
         super().reset(seed=seed)
 
         # Reset the positions of the blue and red dots
-        self.blue_dot_pos = np.array([0, 0], dtype=np.float32)
+        self.blue_dot_pos = np.array([self.screen_width / 2, self.screen_height / 2], dtype=np.float32)
         self.red_dot_pos = np.array([3 * self.screen_width / 4, self.screen_height / 2], dtype=np.float32)
-
 
         self.blue_dot_health = self.test_health
         self.total_reward = 0
-
 
         # Return the initial observation (concatenate blue dot position and red dot position)
         observation = np.concatenate([self.blue_dot_pos, self.red_dot_pos])
@@ -84,51 +84,30 @@ class DotEnv(gym.Env):
 
         return [observation, seed]
 
-
-    def collides_with_obstacle(self, position, obstacle):
-        # Check if the dot's position collides with the given obstacle
-        x, y, width, height = obstacle
-        dot_x, dot_y = position
-        return (x <= dot_x <= x + width) and (y <= dot_y <= y + height)
-
-
-    def resolve_collision(self, position, obstacle):
-        # Adjust the dot's position to resolve the collision with the obstacle
-        x, y, width, height = obstacle
-        dot_x, dot_y = position
-
-        # Calculate the nearest valid position outside the obstacle
-        new_x = max(x, min(dot_x, x + width))
-        new_y = max(y, min(dot_y, y + height))
-
-        position[0] = new_x
-        position[1] = new_y
-
-    def step(self, action):
+    def step(self, step_action):
         reward = 0
-        done = False
+        step_done = False
         # Define the movement speed
         move_speed = 0.9 * self.game_speed
-        offset = 3
+
         # unpacking the action for blue and red dots
-        action_blue_dot = action
-        # print(self.red_dot_pos.dtype, self.red_dot_pos.dtype)
+        action_blue_dot = step_action
 
         if action_blue_dot == 0:  # Move blue dot left
             self.blue_dot_pos[0] -= move_speed
-            # reward -= 0.01
+            # reward += 0.01
 
         elif action_blue_dot == 1:  # Move blue dot right
             self.blue_dot_pos[0] += move_speed
-            # reward -= 0.01
+            # reward += 0.01
 
         elif action_blue_dot == 2:  # Move blue dot up
             self.blue_dot_pos[1] -= move_speed
-            # reward -= 0.01
+            # reward += 0.01
 
         elif action_blue_dot == 3:  # Move blue dot down
             self.blue_dot_pos[1] += move_speed
-            # reward -= 0.01
+            # reward += 0.01
         reward += 0.001
         move_speed = 0.05 * self.game_speed
 
@@ -140,7 +119,9 @@ class DotEnv(gym.Env):
         # print("Direction: ", direction)
         distance_between_centers = np.linalg.norm(self.blue_dot_pos - self.red_dot_pos)
 
-
+        # Clip blue dot position to stay within the first half of the screen
+        self.blue_dot_pos[0] = np.clip(self.blue_dot_pos[0], 0, self.screen_width)
+        self.blue_dot_pos[1] = np.clip(self.blue_dot_pos[1], 0, self.screen_height)
 
         # Clip red dot position to stay within the entire screen
         self.red_dot_pos = np.clip(self.red_dot_pos, [0, 0], [self.screen_width, self.screen_height])
@@ -150,40 +131,27 @@ class DotEnv(gym.Env):
             # Separate the dots by moving the red dot away from the blue dot
             self.red_dot_pos -= -50.0 + move_speed * direction
             self.blue_dot_health -= self.red_dot_attack_dmg
-            if(self.blue_dot_health <= 0):
-                done = True
-            reward -= 5
-            # print("collision")
 
+            if self.blue_dot_health == 0:
+                step_done = True
+            # print("collision")
+            reward -= 5
         else:
             # Move the red dot towards the blue dot with a fixed speed
             self.red_dot_pos += move_speed * direction
 
-        # Clip blue dot position to stay within the first half of the screen
-        self.blue_dot_pos[0] = np.clip(self.blue_dot_pos[0], 0, self.screen_width)
-        self.blue_dot_pos[1] = np.clip(self.blue_dot_pos[1], 0, self.screen_height)
+        if self.blue_dot_health >= 7:
+            reward += 0.01
 
+        if self.blue_dot_health == 0:
+            reward -= 100
 
         # Define a simple reward function (e.g., distance between the two dots)
-        # reward = -np.linalg.norm(self.blue_dot_pos - self.red_dot_pos)
-        self.total_reward += reward
+        self.total_reward = reward
 
+        step_observation = np.concatenate([self.blue_dot_pos, self.red_dot_pos])
 
-        # # check for the dots' collision with the obstacles
-        # for obstacle in self.obstacles:
-        #     if self.collides_with_obstacle(self.blue_dot_pos, obstacle):
-        #         self.resolve_collision(self.blue_dot_pos, obstacle)
-        #     if self.collides_with_obstacle(self.red_dot_pos, obstacle):
-        #         self.resolve_collision(self.red_dot_pos, obstacle)
-
-        # Check if the dots are close to each other (you can adjust the distance threshold as needed)
-        # done = np.linalg.norm(self.blue_dot_pos - self.red_dot_pos) < 10
-
-        # print(self.red_dot_pos.dtype, self.red_dot_pos.dtype)
-
-        observation = np.concatenate([self.blue_dot_pos, self.red_dot_pos])
-
-        return observation, reward, done, False, {}
+        return step_observation, reward, step_done, False, {}
 
     def display_total_reward(self):
         text_surface = self.font.render(f"Reward: {self.total_reward: .2f} Blue Health: {self.blue_dot_health}", True, (0, 0, 0))
@@ -215,56 +183,36 @@ class DotEnv(gym.Env):
             # Draw red dot
             pygame.draw.circle(self.screen, (255, 0, 0), (int(self.red_dot_pos[0]), int(self.red_dot_pos[1])), self.red_dot_radius)
 
-            # # calculating the position of facing direction lines
-            # blue_dot_direction_end = tuple(map(int, self.blue_dot_pos + self.direction_line_length * action_blue))
-            # red_dot_direction_end = tuple(map(int, self.red_dot_pos + self.direction_line_length * action_red))
-            #
-            # # direction line draw
-            # pygame.draw.line(self.screen, (0, 0, 255), tuple(map(int, self.blue_dot_pos)), blue_dot_direction_end, 2)
-            # pygame.draw.line(self.screen, (255, 0, 0), tuple(map(int, self.red_dot_pos)), red_dot_direction_end, 2)
-
             self.display_total_reward()
 
             # Update the display
             pygame.display.update()
 
-            # # Draw rectangular obstacles
-            # for obstacle in self.obstacles:
-            #     pygame.draw.rect(self.screen, (128, 128, 128), obstacle)
-
-    def collides_with_obstacle(self, position, obstacle):
-        # Check if the dot's position collides with the given obstacle
-        x, y, width, height = obstacle
-        dot_x, dot_y = position
-        return (x <= dot_x <= x + width) and (y <= dot_y <= y + height)
-
-    def resolve_collision(self, position, obstacle):
-        # Adjust the dot's position to resolve the collision with the obstacle
-        x, y, width, height = obstacle
-        dot_x, dot_y = position
-
-        # Calculate the nearest valid position outside the obstacle
-        new_x = max(x, min(dot_x, x + width))
-        new_y = max(y, min(dot_y, y + height))
-
-        position[0] = new_x
-        position[1] = new_y
+    def close(self):
+        pygame.quit()
 
 
 # Example usage of the gym environment
 if __name__ == "__main__":
     env = DotEnv()
     done = False
-    observation = env.reset()
+    obs = env.reset()
+    total_reward = 0
+    steps = 0
     while not done:
+
         action_blue = env.action_space.sample()
 
         action = action_blue
 
         observation, reward, done, _, _ = env.step(action)
+        total_reward += reward
+        steps += 1
         env.render()
 
         # if env.blue_dot_health == 0:
         #     env.close()
+    print(f'total reward: {total_reward}. total steps: {steps}')
+    env.close()
 
 
