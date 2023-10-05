@@ -5,26 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3ce46df6-bdd7-4a2d-bfc9-3cecf522e8df" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dqn.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DQN.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/DQN1.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_1/events.out.tfevents.1696399638.DELL-XPS-9310.24944.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_10/events.out.tfevents.1696402806.DELL-XPS-9310.13800.5" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_2/events.out.tfevents.1696399740.DELL-XPS-9310.24944.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_3/events.out.tfevents.1696399789.DELL-XPS-9310.24944.2" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_4/events.out.tfevents.1696400373.DELL-XPS-9310.16236.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_5/events.out.tfevents.1696401830.DELL-XPS-9310.13800.0" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_6/events.out.tfevents.1696402209.DELL-XPS-9310.13800.1" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_7/events.out.tfevents.1696402444.DELL-XPS-9310.13800.2" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_8/events.out.tfevents.1696402603.DELL-XPS-9310.13800.3" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Training/DQN_Logs/DQN_9/events.out.tfevents.1696402620.DELL-XPS-9310.13800.4" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dqn.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/updated.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dqn2/updated.py" beforeDir="false" afterPath="$PROJECT_DIR$/dqn2/updated.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../environments/new.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/../environments/new.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,14 +25,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;shanila&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Shanila/CSE/cse465/New folder/CSE_465/dqn&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "shanila",
+    "last_opened_file_path": "C:/Shanila/CSE/cse465/New folder/CSE_465/dqn",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Shanila\CSE\cse465\New folder\CSE_465\dqn" />

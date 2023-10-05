@@ -5,6 +5,15 @@ import pygame
 import random
 import time
 
+# only 1 food at a time.
+# set a timelimit
+# increase blue speed by a lot
+# eats one food reward increases
+# after eating every 5 food gets a huge bonus
+# after not eating till time over, reward decreases rapidly
+# will teach blue dot not to roam around too much and eat
+# try setting the best snake hyperparameters on net
+
 class DotEnv(gym.Env):
     def __init__(self, screen_width=700, screen_height=700, render_mode='human'):
         super(DotEnv, self).__init__()
