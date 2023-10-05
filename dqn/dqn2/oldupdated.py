@@ -101,7 +101,9 @@ class DotEnv(gym.Env):
         # print(observation)
 
         return [observation, seed]
-
+    # time limit til 10 second then it will end
+    # check if food is edible or not then eat only edible
+    # remove the red dot. plan is to make the blue dot the predator
     def step(self, step_action):
         reward = 0
         step_done = False
