@@ -173,7 +173,8 @@ class DotEnv(gym.Env):
         # done = np.linalg.norm(self.blue_dot_pos - self.red_dot_pos) < 10
 
         # print(self.red_dot_pos.dtype, self.red_dot_pos.dtype)
-        return np.concatenate([self.blue_dot_pos, self.red_dot_pos], dtype=np.float32), reward, done, False, {}
+        return (np.concatenate([self.blue_dot_pos, self.red_dot_pos], dtype=np.float32), self.total_reward,
+                                                                                                done, False, {})
 
     def display_total_reward(self):
         text_surface = self.font.render(f"Reward: {self.total_reward: .2f} Blue Health: {self.blue_dot_health}", True, (0, 0, 0))
