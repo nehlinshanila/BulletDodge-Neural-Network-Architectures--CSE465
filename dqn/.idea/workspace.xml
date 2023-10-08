@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3ce46df6-bdd7-4a2d-bfc9-3cecf522e8df" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dqn2/updated.py" beforeDir="false" afterPath="$PROJECT_DIR$/dqn2/updated.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../environments/new.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/../environments/new.ipynb" afterDir="false" />
-    </list>
+    <list default="true" id="3ce46df6-bdd7-4a2d-bfc9-3cecf522e8df" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,7 +26,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "shanila",
-    "last_opened_file_path": "C:/Shanila/CSE/cse465/New folder/CSE_465/dqn",
+    "last_opened_file_path": "C:/Shanila/CSE/cse465/New folder/CSE_465/dqn/dqn2",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
