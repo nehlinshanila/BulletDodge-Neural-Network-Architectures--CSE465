@@ -8,7 +8,7 @@ SCREEN_HEIGHT = 600
 
 PREDATOR_RADIUS = 20
 FOV_RADIUS = 100
-WALLS = {  # Dictionary to store walls and their values
+WALLS = {
     'wall1': {'x': 280, 'y': 200, 'width': 20, 'height': 40, 'id': 1},
     'wall2': {'x': 320, 'y': 190, 'width': 30, 'height': 60, 'id': 2},
     'wall3': {'x': 390, 'y': 250, 'width': 25, 'height': 30, 'id': 3}
@@ -47,108 +47,60 @@ class GameEnv:
         pygame.draw.circle(screen, BLUE, (int(self.predator_x), int(self.predator_y)), FOV_RADIUS, 1)
 
     def get_fov_points(self):
-        fov_points = {}  # Dictionary of FOV points
-
-        for x in range(int(self.predator_x - FOV_RADIUS), int(self.predator_x + FOV_RADIUS)):
-            for y in range(int(self.predator_y - FOV_RADIUS), int(self.predator_y + FOV_RADIUS)):
-                if x >= 0 and x < SCREEN_WIDTH and y >= 0 and y < SCREEN_HEIGHT:
-                    fov_points[(x, y)] = 0  # Set FOV points as 0 (empty space)
-
-        for wall_name, wall_data in WALLS.items():
-            for x in range(wall_data['x'], wall_data['x'] + wall_data['width']):
-                for y in range(wall_data['y'], wall_data['y'] + wall_data['height']):
-                    fov_points[(x, y)] = wall_data['id']  # Set FOV points in walls as the wall's ID
-
+        fov_points = {}  # Dictionary to store FOV points within the agent's FOV
+        # variables define the range of coordinates(x,y) relative to the agent's position within the FOV
+        fov_x = range(int(-FOV_RADIUS), int(FOV_RADIUS))
+        fov_y = range(int(-FOV_RADIUS), int(FOV_RADIUS))
+        # Iterate over FOV coordinates
+        for x in fov_x:
+            for y in fov_y:
+                fov_x_coord = int(self.predator_x + x)
+                fov_y_coord = int(self.predator_y + y)
+                # checks whether the calculated coordinates fall within the agent's FOV and the screen boundaries.
+                if 0 <= fov_x_coord < SCREEN_WIDTH and 0 <= fov_y_coord < SCREEN_HEIGHT:
+                    # If the coordinates are within the FOV and screen boundaries, the point
+                    # is added to the fov_points dictionary with a value of 0, indicating an assumption of empty space.
+                    fov_points[(fov_x_coord, fov_y_coord)] = 0
         return fov_points
 
-    # def step(self, action):
-    #     self.move_predator(action)
-    #     observation = {
-    #         'predator_position': [self.predator_x, self.predator_y],
-    #         'fov_points': self.get_fov_points(),
-    #         'walls': WALLS,
-    #     }
-    #     reward = 0
-    #     done = False
-    #     info = {}
-    #
-    #     fov_points = observation['fov_points']
-    #     overlapping_walls = {}  # Dictionary to track overlapping walls
-    #
-    #     for (x, y), wall_id in fov_points.items():
-    #         if wall_id != 0:
-    #             if wall_id in overlapping_walls:
-    #                 overlapping_walls[wall_id].append((x, y))
-    #             else:
-    #                 overlapping_walls[wall_id] = [(x, y)]
-    #
-    #     for wall_id, points in overlapping_walls.items():
-    #         wall_name = [name for name, data in WALLS.items() if data['id'] == wall_id][0]
-    #         point_str = ', '.join([f"({x}, {y})" for x, y in points])
-    #         print(f"FOV overlaps with wall '{wall_name}' at point(s): {point_str}")
-    #
-    #     return observation, reward, done, info
-
-
-    # def step(self, action):
-    #     self.move_predator(action)
-    #     observation = {
-    #         'predator_position': [self.predator_x, self.predator_y],
-    #         'fov_points': self.get_fov_points(),
-    #         'walls': WALLS,
-    #     }
-    #     reward = 0
-    #     done = False
-    #     info = {}
-    #
-    #     fov_points = observation['fov_points']
-    #     overlapping_walls = {}  # Dictionary to track overlapping walls
-    #
-    #     for (x, y), wall_id in fov_points.items():
-    #         if wall_id != 0:
-    #             if wall_id in overlapping_walls:
-    #                 overlapping_walls[wall_id].append((x, y))
-    #             else:
-    #                 overlapping_walls[wall_id] = [(x, y)]
-    #
-    #     for wall_id, points in overlapping_walls.items():
-    #         wall_name = [name for name, data in WALLS.items() if data['id'] == wall_id][0]
-    #         point_str = ', '.join([f"({x}, {y})" for x, y in points])
-    #         print(f"FOV overlaps with wall '{wall_name}' at point(s): {point_str}")
-    #
-    #     return observation, reward, done, info
+    def detect_overlapping_points(self):
+        fov_points = self.get_fov_points()
+        overlapping_walls = {}  # Dictionary to track overlapping walls
+        # iterates over the coordinates within the agent's FOV.
+        for fov_x_coord, fov_y_coord in fov_points.keys():
+            # iterates over the walls in the environment in the WALLS dictionary.
+            for wall_name, wall_data in WALLS.items():
+                # variables define the x,y coordinates that belong
+                # to a certain wall based on its position and dimensions.
+                wall_x_range = range(wall_data['x'], wall_data['x'] + wall_data['width'])
+                wall_y_range = range(wall_data['y'], wall_data['y'] + wall_data['height'])
+                # checks whether the current FOV point is inside the range of
+                # coordinates for the current wall. If it is, it indicates an overlap.
+                if fov_x_coord in wall_x_range and fov_y_coord in wall_y_range:
+                    wall_id = wall_data['id']
+                    if wall_id in overlapping_walls:
+                        overlapping_walls[wall_id].append((fov_x_coord, fov_y_coord))
+                    else:
+                        overlapping_walls[wall_id] = [(fov_x_coord, fov_y_coord)]
+        # If an overlap is detected, the code adds its id to the overlapping_walls dictionary.
+        return overlapping_walls
 
     def step(self, action):
         self.move_predator(action)
+    # returning the following ===
+        # predator initial positions
+        # dictionary containing information about the points within the predator's field of view (FOV).
+        # dictionary containing information about the walls in the environment.
+        # dictionary containing information about which walls overlap with the predator's FOV.
         observation = {
             'predator_position': [self.predator_x, self.predator_y],
             'fov_points': self.get_fov_points(),
             'walls': WALLS,
+            'overlapping_walls': self.detect_overlapping_points(),
         }
         reward = 0
         done = False
         info = {}
-
-        fov_points = observation['fov_points']
-        overlapping_walls = {}  # Dictionary to track overlapping walls
-
-        for (x, y), wall_id in fov_points.items():
-            if wall_id != 0:
-                if wall_id in overlapping_walls:
-                    overlapping_walls[wall_id].append((x, y))
-                else:
-                    overlapping_walls[wall_id] = [(x, y)]
-
-        overlaps_str = []
-
-        for wall_id, points in overlapping_walls.items():
-            wall_name = [name for name, data in WALLS.items() if data['id'] == wall_id][0]
-            x_range = (min(x for x, _ in points), max(x for x, _ in points))
-            y_range = (min(y for _, y in points), max(y for _, y in points))
-            overlap_str = f"FOV overlaps with wall '{wall_name}' in the range X: {x_range}, Y: {y_range}"
-            overlaps_str.append(overlap_str)
-
-        print('\n'.join(overlaps_str))
 
         return observation, reward, done, info
 
@@ -159,6 +111,7 @@ class GameEnv:
             'predator_position': [self.predator_x, self.predator_y],
             'fov_points': self.get_fov_points(),
             'walls': WALLS,
+            'overlapping_walls': self.detect_overlapping_points(),
         }
         return observation
 
@@ -179,6 +132,12 @@ def main():
         env.draw_environment()
 
         pygame.display.flip()
+
+        # Print FOV overlapped points
+        overlapping_walls = observation['overlapping_walls']
+        for wall_id, overlaps in overlapping_walls.items():
+            for coord in overlaps:
+                print(f"FOV overlaps with wall ID {wall_id} at coordinates: {coord}")
 
     pygame.quit()
 
