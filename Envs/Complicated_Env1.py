@@ -4,13 +4,13 @@ import time
 
 import numpy as np
 import pygame
+import gymnasium as gym
 from gymnasium import Env
 from gymnasium.spaces import Discrete, Dict, Box
 
 from Agents.agent import Agent
-# from Agents.fov_points import get_fov_points
 from Agents.overlap_detection import detect_overlapping_points
-from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, WALLS, FOV_RADIUS
+from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, WALLS
 from Walls.collision_detection import detect_collision
 from Walls.wall_class import Walls
 
@@ -27,15 +27,9 @@ class GameEnv(Env):
         self.screen_height = SCREEN_HEIGHT
         self.render_mode = render_mode
 
+        # self.observation_space = Box(low=0, high=self.screen_width, shape=(360,))
+        self.observation_space = Box(low=np.zeros(360), high=self.screen_width * np.ones(360), dtype=np.float32)
         # defining the observation and action spaces for all the agents
-        self.observation_space = Dict({
-            'predator_position': Box(low=np.array([0, 0], dtype=np.float32),
-                                     high=np.array([SCREEN_WIDTH, SCREEN_HEIGHT], dtype=np.float32),
-                                     dtype=np.float32),
-            'vision': Dict({
-                'vision_points': Discrete(2)
-            }),
-        })
 
         # defining the action space based on total number of predator and prey
         # since we are training only one agent so, defining only the necessary number of actions
@@ -79,13 +73,28 @@ class GameEnv(Env):
 
         self.predator_agent = predator_agents
 
-    def _get_obs(self):
-        observation = {
-            'predator_position': self.predator_agent.current_position,
-            'predator_angle': self.predator_agent.angle,
-            'vision': detect_overlapping_points(self.predator_agent.current_position, WALLS),
-        }
+    def flatten_list(self, nested_list):
+        flattened_list = []
+        for item in nested_list:
+            if isinstance(item, list):
+                flattened_list.extend(self.flatten_list(item))
+            else:
+                flattened_list.append(item)
+        return flattened_list
 
+    def _get_obs(self):
+        observation = []
+        agent_pos = [self.predator_agent.current_position[0], self.predator_agent.current_position[1]]
+        observation.append(agent_pos)
+
+        angle = self.predator_agent.angle
+        observation.append(angle)
+
+        value_list = detect_overlapping_points(self.predator_agent.current_position, WALLS)
+        observation.append(value_list)
+
+        observation = self.flatten_list(observation)
+        # print(observation)
         return observation
 
     def _max_right(self):
@@ -104,6 +113,8 @@ class GameEnv(Env):
         self.wall.clear_walls()
         self.walls = self.wall.make_wall(WALLS)
 
+        # self.set_obs_space()
+
         self.total_steps = 0
         self.predator_total_reward = 0
 
@@ -116,7 +127,6 @@ class GameEnv(Env):
         # setting the predator and prey to their initial position
 
         self.predator_agent = predator
-
 
         # all the variable values inside the observation space needs to be sent inside the observation variable
         # for this level purpose we decided to add the dictionary observation
@@ -147,13 +157,13 @@ class GameEnv(Env):
         # observation needs to be set a dictionary
 
         self.total_steps += 1
-        print(self._max_right())
         # for wall in self.walls:
         if self.predator_agent.current_position[0] > self._max_right():
             reward += 100
             done = True
 
         if elapsed_time >= self.total_running_time:
+            reward -= 50
             done = True
         """
         here lies the most important task
