@@ -1,13 +1,14 @@
-from gymnasium.spaces import Discrete, Box
-from gymnasium import Env
-import numpy as np
-import pygame
-
-from Agents.agent import Agent
-
 import os
 import sys
 import time
+
+import numpy as np
+import pygame
+from gymnasium import Env
+from gymnasium.spaces import Discrete, Box
+
+from Agents.agent import Agent
+
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 

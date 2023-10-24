@@ -1,8 +1,9 @@
 import numpy as np
 
-from constants import SCREEN_HEIGHT,SCREEN_WIDTH,FOV_RADIUS
+from Constants.constants import SCREEN_HEIGHT, SCREEN_WIDTH, FOV_RADIUS
 
-#! time complexity of O(n)
+
+# ! time complexity of O(n)
 def get_fov_points(agent_position):
     fov_points = []
     x, y = agent_position
@@ -19,7 +20,8 @@ def get_fov_points(agent_position):
             fov_points.append((x_coord, y_coord))
     return fov_points
 
-#?print
+
+# ?print
 # if __name__ == '__main__':
 #     agent_location = [328.8917, 301.3598]
 #     print(get_fov_points(agent_location))

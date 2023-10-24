@@ -29,3 +29,4 @@ def detect_collision(agent, walls):
             if wall.left - offset < agent.current_position[0] < wall.right + offset:
                 agent.current_position[1] = wall.bottom + agent.radius
 
+    return agent

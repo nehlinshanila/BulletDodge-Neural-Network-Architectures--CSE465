@@ -14,6 +14,7 @@ class Walls:
     # the dictionary of walls needs to contain the x, y, width, height of the walls
     # any extra key:value are unused or maybe used if needed in the future
     def make_wall(self, wall_list):
+
         for key, value in wall_list.items():
             x = value['x']
             y = value['y']

@@ -1,5 +1,6 @@
-import numpy as np
 import math
+
+import numpy as np
 
 
 class Agent:
@@ -27,6 +28,7 @@ class Agent:
         self.center = 0
         self.direction = 0
         self.direction_end = 0
+        self.radius = 15
 
         # this is custom only for the render function
         self.draw_direction_end = 0
@@ -56,6 +58,7 @@ class Agent:
 
         # this part is only for the render function
         self.draw_direction_end = (self.current_position[0] + dir_vec_x, self.current_position[1] + dir_vec_y)
+        self.center = (int(self.current_position[0]), int(self.current_position[1]))
 
     # updating the direction, line-end according to given angle when called
     def get_direction(self):

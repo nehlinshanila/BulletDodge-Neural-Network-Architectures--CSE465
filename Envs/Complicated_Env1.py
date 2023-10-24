@@ -1,27 +1,29 @@
-from gymnasium.spaces import Discrete, Box, Dict
-from gymnasium import Env
-
-import pygame
-
-# env essentials import
-from Agents.agent import Agent
-from Walls.wall_class import Walls
-from Walls.collision_detection import detect_collision
-
-
 import os
 import sys
 import time
+
+import pygame
+from gymnasium import Env
+from gymnasium.spaces import Discrete, Dict
+
+from Agents.agent import Agent
+from Agents.fov_points import get_fov_points
+from Agents.overlap_detection import detect_overlapping_points
+from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, WALLS, FOV_RADIUS
+from Walls.collision_detection import detect_collision
+from Walls.wall_class import Walls
+
+# env essentials import
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 
 class GameEnv(Env):
-    def __init__(self, screen_width=400, screen_height=400, render_mode='human'):
+    def __init__(self, render_mode='human'):
         super(GameEnv, self).__init__()
 
         # defining the screen dimension for render purpose
-        self.screen_width = screen_width
-        self.screen_height = screen_height
+        self.screen_width = SCREEN_WIDTH
+        self.screen_height = SCREEN_HEIGHT
         self.render_mode = render_mode
 
         # defining the observation and action spaces for all the agents
@@ -60,10 +62,23 @@ class GameEnv(Env):
         pygame.font.init()
         self.font = pygame.font.Font(None, 18)
 
+        # for the wall initializations
+        self.wall = Walls(pygame)
+        self.walls = None
+
     def agent_init(self):
         predator_agents = Agent('predator', 0)
 
         self.predator_agent = predator_agents
+
+    def _get_obs(self):
+        observation = {
+            'predator_position': self.predator_agent.current_position,
+            'fov_points': get_fov_points(self.predator_agent.current_position),
+            'overlapping_walls': detect_overlapping_points(self.predator_agent.current_position, WALLS, FOV_RADIUS),
+        }
+
+        return observation
 
     # the usual reset function
     def reset(self, seed=0):
@@ -83,11 +98,13 @@ class GameEnv(Env):
         # setting the predator and prey to their initial position
 
         self.predator_agent = predator
+        self.wall.clear_walls()
+        self.walls = self.wall.make_wall(WALLS)
 
         # all the variable values inside the observation space needs to be sent inside the observation variable
         # for this level purpose we decided to add the dictionary observation
         # set the observation to a dictionary
-        observation = None
+        observation = self._get_obs()
         self.obs = observation
 
         return observation, seed
@@ -107,18 +124,19 @@ class GameEnv(Env):
             if event.type == pygame.QUIT:
                 done = True
                 pygame.quit()
-
-        predator = self.predator_agent
+        self.predator_agent.step_update(action, range_x=self.screen_width, range_y=self.screen_height)
+        self.predator_agent = detect_collision(self.predator_agent, self.walls)
 
         # observation needs to be set a dictionary
-        observation = None
 
         self.total_steps += 1
+        for wall in self.walls:
+            if self.predator_agent.current_position[0] > wall.right:
+                reward += 100
+                done = True
 
-        if predator.current_position > wall.right:
-            reward += 100
+        if elapsed_time >= self.total_running_time:
             done = True
-
         """
         here lies the most important task
         handling the rewards
@@ -127,6 +145,7 @@ class GameEnv(Env):
         self.render()
 
         # it will update the total reward every step
+        observation = self._get_obs()
         self.predator_total_reward = reward
         self.obs = observation
 
@@ -134,7 +153,17 @@ class GameEnv(Env):
 
     def render(self):
         if self.render_mode == 'human':
-            pass
+            screen = self.screen
+
+            screen.fill(WHITE)
+            predator = self.predator_agent
+            pygame.draw.circle(screen, RED, predator.center, predator.radius)
+            pygame.draw.line(screen, RED, predator.center, predator.draw_direction_end, 5)
+
+            for key, wall in WALLS.items():
+                pygame.draw.rect(screen, BLUE, (wall['x'], wall['y'], wall['width'], wall['height']))
+
+            pygame.display.update()
 
     def close(self):
         pygame.quit()
