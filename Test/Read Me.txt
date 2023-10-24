@@ -1,6 +1,0 @@
-Please use 
-- Agents(Folder)
-- Envs (Folder)
-- Testing (Folder)
-
-and learn by testing out block by blobk in ipynb
