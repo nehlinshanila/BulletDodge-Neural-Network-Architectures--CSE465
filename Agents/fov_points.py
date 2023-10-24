@@ -19,9 +19,16 @@ def get_fov_points(agent_position):
             # If yes, then add the coordinates to the fov_points list
             fov_points[(x_coord, y_coord)] = 0
             # fov_points.append((x_coord, y_coord))
+        else:
+            fov_points[(x_coord, y_coord)] = 1
     return fov_points
 
 
 # if __name__ == '__main__':
-#     agent_pos = [328.8917, 301.3598]
-#     print(get_fov_points(agent_pos))
+#     agent_pos = [50, 300]
+#     count = 0
+#     fov = get_fov_points(agent_pos)
+#     for key, value in fov.items():
+#         if key[0] < 0:
+#             print(key[0], key[1])
+#     print(count)
