@@ -2,12 +2,13 @@ import os
 import sys
 import time
 
+import numpy as np
 import pygame
 from gymnasium import Env
-from gymnasium.spaces import Discrete, Dict
+from gymnasium.spaces import Discrete, Dict, Box
 
 from Agents.agent import Agent
-from Agents.fov_points import get_fov_points
+# from Agents.fov_points import get_fov_points
 from Agents.overlap_detection import detect_overlapping_points
 from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, WALLS, FOV_RADIUS
 from Walls.collision_detection import detect_collision
@@ -27,7 +28,14 @@ class GameEnv(Env):
         self.render_mode = render_mode
 
         # defining the observation and action spaces for all the agents
-        self.observation_space = Dict()
+        self.observation_space = Dict({
+            'predator_position': Box(low=np.array([0, 0], dtype=np.float32),
+                                     high=np.array([SCREEN_WIDTH, SCREEN_HEIGHT], dtype=np.float32),
+                                     dtype=np.float32),
+            'vision': Dict({
+                'vision_points': Discrete(2)
+            }),
+        })
 
         # defining the action space based on total number of predator and prey
         # since we are training only one agent so, defining only the necessary number of actions
@@ -74,17 +82,27 @@ class GameEnv(Env):
     def _get_obs(self):
         observation = {
             'predator_position': self.predator_agent.current_position,
-            'fov_points': get_fov_points(self.predator_agent.current_position),
-            'overlapping_walls': detect_overlapping_points(self.predator_agent.current_position, WALLS, FOV_RADIUS),
+            'predator_angle': self.predator_agent.angle,
+            'vision': detect_overlapping_points(self.predator_agent.current_position, WALLS),
         }
 
         return observation
+
+    def _max_right(self):
+        max_right = 0
+
+        for wall in self.walls:
+            if wall.right > max_right:
+                max_right = wall.right
+        return max_right
 
     # the usual reset function
     def reset(self, seed=0):
         self.start_time = time.time()
 
         self.agent_init()
+        self.wall.clear_walls()
+        self.walls = self.wall.make_wall(WALLS)
 
         self.total_steps = 0
         self.predator_total_reward = 0
@@ -92,14 +110,13 @@ class GameEnv(Env):
         predator = self.predator_agent
 
         # for predator in self.predator_agents:
-        predator.agent_reset(width=self.screen_width, height=self.screen_height)
+        predator.agent_reset(width=self.screen_width, height=self.screen_height, walls=self.walls)
         # observation.append([predator.index, predator.agent, predator.current_position])
 
         # setting the predator and prey to their initial position
 
         self.predator_agent = predator
-        self.wall.clear_walls()
-        self.walls = self.wall.make_wall(WALLS)
+
 
         # all the variable values inside the observation space needs to be sent inside the observation variable
         # for this level purpose we decided to add the dictionary observation
@@ -130,10 +147,11 @@ class GameEnv(Env):
         # observation needs to be set a dictionary
 
         self.total_steps += 1
-        for wall in self.walls:
-            if self.predator_agent.current_position[0] > wall.right:
-                reward += 100
-                done = True
+        print(self._max_right())
+        # for wall in self.walls:
+        if self.predator_agent.current_position[0] > self._max_right():
+            reward += 100
+            done = True
 
         if elapsed_time >= self.total_running_time:
             done = True
@@ -141,7 +159,7 @@ class GameEnv(Env):
         here lies the most important task
         handling the rewards
         """
-        reward += 0.1
+        reward += 0.01
         self.render()
 
         # it will update the total reward every step

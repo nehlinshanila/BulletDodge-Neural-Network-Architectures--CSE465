@@ -37,12 +37,19 @@ class Agent:
     def agent_action(self, action):
         pass
 
+    def _get_min_left(self, walls):
+        min_x = 1000
+        for wall in walls:
+            if wall.left < min_x:
+                min_x = wall.left
+        return min_x
+
     # for handling all the initial states
-    def agent_reset(self, width, height):
+    def agent_reset(self, width, height, walls):
         padding = 30
         # updating the initial random position of the agent at 1st
         self.current_position = np.array(
-            [np.random.uniform(30, width - padding), np.random.uniform(30, height - padding)],
+            [np.random.uniform(30, self._get_min_left(walls)), np.random.uniform(30, height - padding)],
             dtype=np.float32)
 
         # updating the initial orientation to 0 degree at 1st
