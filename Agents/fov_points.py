@@ -1,13 +1,13 @@
 import numpy as np
+import time
+import math
 
-from Constants.constants import SCREEN_HEIGHT, SCREEN_WIDTH, FOV_RADIUS
+from Constants.constants import SCREEN_HEIGHT, SCREEN_WIDTH, FOV_RADIUS, PREDATOR_RADIUS
 
 
-# ! time complexity of O(n)
 def get_fov_points(agent_position):
     fov_points = {}
     x, y = agent_position
-    # Loop that iterates from 0 to 359, representing all possible angles in degrees.
     for angle in range(360):
         # Convert angle to radians
         radians = np.deg2rad(angle)
