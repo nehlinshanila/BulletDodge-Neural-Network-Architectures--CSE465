@@ -1,13 +1,6 @@
 import math
 
 
-SCREEN_WIDTH = 600
-SCREEN_HEIGHT = 600
-FOV_RADIUS = 100
-PREDATOR_RADIUS = 15
-AGENT_COLOR = (255, 0, 0)
-FOV_COLOR = (0, 0, 255)
-
 # (x, y) is the position of the ray.
 # (dx, dy) is the direction vector of the ray.
 # (left, top) is the top-left corner of the wall.
@@ -38,7 +31,3 @@ def calculate_wall_intersection(x, y, dx, dy, left, top, right, bottom):
         # If there's no intersection, return positive infinity
         return float('inf')
     # inf== positive infinity
-
-
-
-
