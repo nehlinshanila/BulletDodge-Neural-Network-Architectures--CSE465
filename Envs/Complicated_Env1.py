@@ -9,7 +9,8 @@ from gymnasium import Env
 from gymnasium.spaces import Discrete, Dict, Box
 
 from Agents.agent import Agent
-from Agents.overlap_detection import detect_overlapping_points
+# from Agents.overlap_detection import detect_overlapping_points
+from Agents.RayCast import get_fov_rays
 from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, WALLS
 from Walls.collision_detection import detect_collision
 from Walls.wall_class import Walls
@@ -90,7 +91,8 @@ class GameEnv(Env):
         angle = self.predator_agent.angle
         observation.append(angle)
 
-        value_list = detect_overlapping_points(self.predator_agent.current_position, WALLS)
+        # value_list = detect_overlapping_points(self.predator_agent.current_position, WALLS)
+        value_list = get_fov_rays(agent_pos)
         observation.append(value_list)
 
         observation = self.flatten_list(observation)
