@@ -27,17 +27,21 @@ def detect_overlapping_points(agent_position, walls_dict):
         # Check if there's an overlap with any walls using the R-tree index
         if any(idx.intersection((x, y, x, y))):
             updated_fov[fov_point] = 1
-    updated_fov = [ value for _, value in updated_fov.items()]
+    updated_fov = [value for _, value in updated_fov.items()]
     # updated_fov = np.array(updated_fov, dtype=np.int32)
+    excess_length = 360 - len(updated_fov)
+    if excess_length != 0:
+        for i in range(excess_length):
+            updated_fov.append(1)
     return updated_fov
 
 
-# if __name__ == '__main__':
-#     agent_location = [328.8917, 301.3598]
-#     # fov_points = get_fov_points(agent_location)
-#     fov = detect_overlapping_points(agent_location, WALLS)
-#
-#     print(fov)
+if __name__ == '__main__':
+    agent_location = [20, 550]
+    # fov_points = get_fov_points(agent_location)
+    fov = detect_overlapping_points(agent_location, WALLS)
+
+    print(len(fov))
 #     obs2 = {f'point{index}': value for index, (_, value) in enumerate(fov)}
 #     print(obs2)
     # Print the FOV points (fov) and their values

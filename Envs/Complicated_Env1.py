@@ -28,12 +28,12 @@ class GameEnv(Env):
         self.render_mode = render_mode
 
         # self.observation_space = Box(low=0, high=self.screen_width, shape=(360,))
-        self.observation_space = Box(low=np.zeros(360, dtype=np.float32), high=self.screen_width * np.ones(360, dtype=np.float32), dtype=np.float32)
+        self.observation_space = Box(low=np.zeros(363, dtype=np.float32), high=self.screen_width * np.ones(363, dtype=np.float32), dtype=np.float32)
         # defining the observation and action spaces for all the agents
 
         # defining the action space based on total number of predator and prey
         # since we are training only one agent so, defining only the necessary number of actions
-        self.action_space = Discrete(5)
+        self.action_space = Discrete(3)
         # 5 for rotate
         # clockwise, anti-clock
         # move front, move back and wait

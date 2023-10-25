@@ -113,18 +113,18 @@ class Agent:
             # self.get_direction()
 
         # move back
-        elif action == 3:
-            self.current_position = self.current_position - self.direction * self.movement_speed
+        # elif action == 3:
+        #     self.current_position = self.current_position - self.direction * self.movement_speed
             # self.get_direction()
 
         # do nothing / wait
-        elif action == 4:
-            pass
+        # elif action == 4:
+        #     pass
 
         self.get_direction()
 
-        self.current_position[0] = np.clip(self.current_position[0], 0, range_x)
-        self.current_position[1] = np.clip(self.current_position[1], 0, range_y)
+        self.current_position[0] = np.clip(self.current_position[0], 10, range_x-10)
+        self.current_position[1] = np.clip(self.current_position[1], 10, range_y-10)
 
     # this function returns all the state needed for the observations
     # ! can be changed with need for the algorithm
