@@ -1,5 +1,5 @@
 import math
-from RayCasting_Walls import calculate_wall_intersection, OBSTACLES
+from RayCasting_Walls import OBSTACLES
 # Constants
 SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 600
