@@ -1,4 +1,8 @@
 import math
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
 from Constants.constants import FOV_RADIUS, WALLS
 # Constants
 
