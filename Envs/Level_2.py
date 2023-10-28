@@ -20,6 +20,8 @@ sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
 WALLS2 = LEVEL_2_WALLS
 
+WALLS2 = LEVEL_2_WALLS
+
 
 class GameEnv(Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
@@ -39,27 +41,20 @@ class GameEnv(Env):
                                      high=np.array([self.screen_width, self.screen_height], dtype=np.float32),
                                      dtype=np.float32),
             "predator_angle": Discrete(360),
-            "destination_coordinates": Box(low=np.array([0, 0, 0, 0], dtype=np.float32),
-                                           high=np.array([self.screen_width, self.screen_height, self.screen_width,
-                                                          self.screen_height], dtype=np.float32),
+            # to send only the points for which he has to cross
+            "destination_coordinates": Box(low=np.array([0, 0], dtype=np.float32),
+                                           high=np.array([self.screen_width, self.screen_height], dtype=np.float32),
                                            dtype=np.float32),
-        })
-        # defining the observation and action spaces for all the agents
-        # self.observation_space = None
 
-        # defining the action space based on total number of predator and prey
-        # since we are training only one agent so, defining only the necessary number of actions
+        })
+
         self.action_space = Discrete(3)
-        # 5 for rotate
-        # clockwise, anti-clock
-        # move front, move back and wait
+        # 3 for
+        # rotate clockwise, anti-clock
+        # move front
 
         self.total_steps = 0
-
-        self.number_of_predator = 1
-
-        self.predator_agent = None
-
+        self.predator_agent = Agent('predator', 0)
         self.predator_total_reward = 0
 
         self.obs = None
@@ -68,17 +63,6 @@ class GameEnv(Env):
         self.start_time = 0
         self.total_running_time = 10
 
-        # the pygame window should be initialized in the render function
-        # initializing the pygame
-        # pygame.init()
-
-        # # setting the screen size
-        # self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        # pygame.display.set_caption('Multi Agent Environment(simple)')
-
-        # # initializing the font
-        # pygame.font.init()
-        # self.font = pygame.font.Font(None, 18)
         self.window = None
         self.clock = None
 
@@ -86,104 +70,61 @@ class GameEnv(Env):
         self.wall = Walls(pygame)
         self.walls = None
 
-    def agent_init(self):
-        predator_agents = Agent('predator', 0)
+        self.goal_seen = False
 
-        self.predator_agent = predator_agents
-
-    def flatten_list(self, nested_list):
+    def _flatten_list(self, nested_list):
         flattened_list = []
         for item in nested_list:
             if isinstance(item, list):
-                flattened_list.extend(self.flatten_list(item))
+                flattened_list.extend(self._flatten_list(item))
             else:
                 flattened_list.append(item)
         return flattened_list
 
     def _get_obs(self):
-        """
-        these are for the box observation
-        """
-        # observation = []
-        # agent_pos = [self.predator_agent.current_position[0], self.predator_agent.current_position[1]]
-        # observation.append(agent_pos)
-
-        # angle = self.predator_agent.angle
-        # observation.append(angle)
-
-        # # value_list = detect_overlapping_points(self.predator_agent.current_position, WALLS)
-        # value_list = get_fov_rays(agent_pos)
-        # observation.append(value_list)
-
-        # observation = self.flatten_list(observation)
-        """
-        ends here
-        """
-
-        top = np.array(self.walls[0].bottomright, dtype=np.float32)
-        bottom = np.array(self.walls[1].topright, dtype=np.float32)
-
         observation = {
             "predator_position": self.predator_agent.current_position,
             "predator_angle": self.predator_agent.angle,
-            "destination_coordinates": np.concatenate([top, bottom]),
+            "destination_coordinates": None,  # need to send a np.array for the goal to reach,
         }
-
         # print(observation)
         return observation
 
     # to capture all the info
     def _get_info(self):
-        mid_point = (np.array(self.walls[0].midbottom, dtype=np.float32) + np.array(self.walls[1].midtop,
-                                                                                    dtype=np.float32)) / 2
-        # print(f' mid point: {mid_point}')
-        direction = mid_point - self.predator_agent.current_position
+        """
+            need to add some code to calculate the distance from agent center to goal (x,y)
+        """
 
-        # here goes a proximal reward function to maximize any trial of getting close to the goal
-        distance = np.linalg.norm(direction)
         info = {
-            "distance": distance,
+            "goal_seen": self.goal_seen,
+            "distance": 450,
+            "vision_blocked": not self.goal_seen,
         }
 
         return info
 
-    def _max_right(self):
-        max_right = 0
-
-        for wall in self.walls:
-            if wall.right > max_right:
-                max_right = wall.right
-
-        return max_right
-
     def get_reward(self, reward):
+        curve = -0.03
+        ascend = 0.02
+        clamp = 10
+
         reward = reward
+        goal_coordinate = 0
+        agent_pos = self.predator_agent.current_position
+        
+        if seen:
+            direction = goal_coordinate -
+            distance = np.linalg.norm(direction)
+            reward += ascend * np.exp(curve * distance) - clamp
 
-        # for wall in self.walls:
-        #     if wall.left - self.predator_agent.current_position[0] + self.predator_agent.radius < 2:
-        #         reward -= 10
-        #         print(f'less than wall left pred: {self.predator_agent.current_position[0] + self.predator_agent.radius}, wall: {wall.left}')
-        #     if self.predator_agent.current_position[0] + self.predator_agent.radius > wall.left \
-        #         and self.predator_agent.current_position[0] - self.predator_agent.radius > wall.right:
-        #         if self.predator_agent.current_position[0] - self.predator_agent.radius - wall.right  < 2:
-        #             reward -= 10
-        #             print(f'less than wall right pred: {self.predator_agent.current_position[0] + self.predator_agent.radius}, wall: {wall.right}')
+        if agent_pos[0] > goal_coordinate[0] and agent_pos[1] < goal_coordinate[1]:
+            done = True
+            reward = 200
 
-        #     if self.predator_agent.current_position[0] + self.predator_agent.radius > wall.left \
-        #         and self.predator_agent.current_position[0] + self.predator_agent.radius < wall.right:
-        #         reward += 50
-        # print(f'midtop: {self.walls[0].midtop}, midbottom: {self.walls[1].midbottom}')
-        mid_point = (np.array(self.walls[0].midbottom, dtype=np.float32) + np.array(self.walls[1].midtop,
-                                                                                    dtype=np.float32)) / 2
-        # print(f'mid point: {mid_point}')
-        direction = mid_point - self.predator_agent.current_position
+        reward += 0.001
 
-        # here goes a proximal reward function to maximize any trial of getting close to the goal
-        distance = np.linalg.norm(direction)
-        if self.predator_agent.current_position[0] < mid_point[0]:
-            reward += 1 / distance
-
-        # print(f'direction: {direction}, distance:{distance}, reward: {reward}')
+        print(f'direction: {direction}, distance:{distance}, reward: {reward}')
         return reward
 
     # the usual reset function
@@ -191,30 +132,19 @@ class GameEnv(Env):
         super().reset(seed=seed)
         self.start_time = time.time()
 
-        self.agent_init()
         self.wall.clear_walls()
         self.walls = self.wall.make_wall(WALLS2)
-
-        # self.set_obs_space()
 
         self.total_steps = 0
         self.predator_total_reward = 0
 
-        predator = self.predator_agent
-
         # for predator in self.predator_agents:
-        predator.agent_reset(width=self.screen_width, height=self.screen_height, walls=self.walls)
-        # observation.append([predator.index, predator.agent, predator.current_position])
-
-        # setting the predator and prey to their initial position
-
-        self.predator_agent = predator
+        self.predator_agent.agent_reset(width=self.screen_width, height=self.screen_height, walls=self.walls)
 
         # all the variable values inside the observation space needs to be sent inside the observation variable
         # for this level purpose we decided to add the dictionary observation
         # set the observation to a dictionary
         observation = self._get_obs()
-        self.obs = observation
         info = self._get_info()
 
         return observation, info
@@ -224,6 +154,7 @@ class GameEnv(Env):
         done = False
         reward = 0
         truncated = False
+        info = {}
         current_time = time.time()
 
         elapsed_time = current_time - self.start_time
@@ -236,12 +167,14 @@ class GameEnv(Env):
         self.total_steps += 1
         reward = self.get_reward(reward)
 
+        if self.predator_agent.current_position[0] > self.walls[1].right:
+            reward += 100
         # for wall in self.walls:
         if self.predator_agent.current_position[0] > self._max_right():
             reward += 200
             done = True
 
-        if elapsed_time >= self.total_running_time + 5:
+        if elapsed_time >= self.total_running_time + 10:
             reward -= 100
             done = True
         """
@@ -281,6 +214,21 @@ class GameEnv(Env):
         predator = self.predator_agent
         pygame.draw.circle(screen, RED, predator.center, predator.radius)
         pygame.draw.line(screen, RED, predator.center, predator.draw_direction_end, 5)
+
+        mid_point = 0
+
+        if self.predator_agent.current_position[0] < self.walls[0].midbottom[0]:
+            mid_point = (np.array(self.walls[0].midbottom, dtype=np.float32) + np.array(self.walls[1].midtop,
+                                                                                        dtype=np.float32)) / 2
+            # print(f'mid point: {mid_point}')
+            direction = mid_point - self.predator_agent.current_position
+
+        if self.walls[0].right < self.predator_agent.current_position[0] < self.walls[2].midbottom[0]:
+            mid_point = (np.array(self.walls[2].midbottom, dtype=np.float32) + np.array(self.walls[3].midtop,
+                                                                                        dtype=np.float32)) / 2
+            direction = mid_point - self.predator_agent.current_position
+        mid_point = (int(mid_point[0]), int(mid_point[1]))
+        pygame.draw.line(screen, RED, predator.center, mid_point, 2)
 
         for key, wall in WALLS2.items():
             pygame.draw.rect(screen, BLUE, (wall['x'], wall['y'], wall['width'], wall['height']))
