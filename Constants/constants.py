@@ -75,3 +75,9 @@ LEVEL_3_WALLS = {
 }
 
 #level_1_walls, level_2_walls
+# Define objects with arbitrary shapes
+objects = {
+    "wall2": [(200, 300), (220, 300), (220, 400), (200, 400)],
+    "wall3": [(300, 200), (320, 200), (320, 300), (300, 300)],
+    "wall4": [(400, 400), (430, 400), (430, 430), (400, 430)]
+}
