@@ -70,4 +70,4 @@ WALLS2 = {
     '6': {'x': (3 * SCREEN_WIDTH) // 4 - 25, 'y': 350, 'width': 50, 'height': 250},
 }
 
-level_1_walls, level_2_walls
+#level_1_walls, level_2_walls
