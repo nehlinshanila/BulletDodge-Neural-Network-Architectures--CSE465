@@ -61,7 +61,28 @@ WALLS = {
     }
 }
 
-WALLS2 = {
+# WALLS2 = {
+#     '1': {'x': SCREEN_WIDTH // 2 - 25, 'y': 0, 'width': 50, 'height': 50},
+#     '2': {'x': SCREEN_WIDTH // 2 - 25, 'y': 150, 'width': 50, 'height': 450},
+#     '3': {'x': SCREEN_WIDTH // 4 - 25, 'y': 0, 'width': 50, 'height': 450},
+#     '4': {'x': SCREEN_WIDTH // 4 - 25, 'y': 550, 'width': 50, 'height': 50},
+#     '5': {'x': (3 * SCREEN_WIDTH) // 4 - 25, 'y': 0, 'width': 50, 'height': 250},
+#     '6': {'x': (3 * SCREEN_WIDTH) // 4 - 25, 'y': 350, 'width': 50, 'height': 250},
+# }
+
+LEVEL_1_WALLS = {
+    '1': {'x': SCREEN_WIDTH // 2 - 25, 'y': 0, 'width': 50, 'height': 50},
+    '2': {'x': SCREEN_WIDTH // 2 - 25, 'y': 150, 'width': 50, 'height': 450},
+}
+
+LEVEL_2_WALLS = {
+    '1': {'x': SCREEN_WIDTH // 4 - 25, 'y': 0, 'width': 50, 'height': 450},
+    '2': {'x': SCREEN_WIDTH // 4 - 25, 'y': 550, 'width': 50, 'height': 50},
+    '3': {'x': SCREEN_WIDTH // 2 - 25, 'y': 0, 'width': 50, 'height': 50},
+    '4': {'x': SCREEN_WIDTH // 2 - 25, 'y': 150, 'width': 50, 'height': 450},
+}
+
+LEVEL_3_WALLS = {
     '1': {'x': SCREEN_WIDTH // 2 - 25, 'y': 0, 'width': 50, 'height': 50},
     '2': {'x': SCREEN_WIDTH // 2 - 25, 'y': 150, 'width': 50, 'height': 450},
     '3': {'x': SCREEN_WIDTH // 4 - 25, 'y': 0, 'width': 50, 'height': 450},

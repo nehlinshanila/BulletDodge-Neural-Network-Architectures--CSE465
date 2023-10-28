@@ -11,14 +11,16 @@ from gymnasium.spaces import Discrete, Dict, Box
 from Agents.agent import Agent
 # from Agents.overlap_detection import detect_overlapping_points
 from Agents.RayCast import get_fov_rays
-from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_1_WALLS
+from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_2_WALLS
 from Walls.collision_detection import detect_collision
 from Walls.wall_class import Walls
 
 # env essentials import
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 
-WALLS2 = LEVEL_1_WALLS
+WALLS2 = LEVEL_2_WALLS
+
+
 class GameEnv(Env):
     metadata = {"render_modes": ["human", "rgb_array"], "render_fps": 4}
 
@@ -31,11 +33,6 @@ class GameEnv(Env):
 
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
-
-        # total_values = 219
-        # self.observation_space = Box(low=np.zeros(total_values, dtype=np.float32),
-        #                             high=self.screen_width * np.ones(total_values, dtype=np.float32),
-        #                             dtype=np.float32)
 
         self.observation_space = Dict({
             "predator_position": Box(low=np.array([0, 0], dtype=np.float32),
