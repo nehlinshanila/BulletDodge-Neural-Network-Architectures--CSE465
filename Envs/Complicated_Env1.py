@@ -7,7 +7,8 @@ import pygame
 import gymnasium as gym
 from gymnasium import Env
 from gymnasium.spaces import Discrete, Dict, Box
-
+# env essentials import
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from Agents.agent import Agent
 # from Agents.overlap_detection import detect_overlapping_points
 from Agents.RayCast import get_fov_rays
@@ -15,8 +16,7 @@ from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, W
 from Walls.collision_detection import detect_collision
 from Walls.wall_class import Walls
 
-# env essentials import
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
 
 
 class GameEnv(Env):
