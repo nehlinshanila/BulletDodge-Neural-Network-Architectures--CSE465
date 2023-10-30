@@ -45,14 +45,16 @@ class Agent:
         return min_x
 
     # for handling all the initial states
-    def agent_reset(self, width, height, walls):
+    def agent_reset(self, width, height):
         padding = 30
         # updating the initial random position of the agent at 1st
         # self.current_position = np.array(
         #     [np.random.uniform(30, self._get_min_left(walls)), np.random.uniform(30, height - padding)],
         #     dtype=np.float32)
 
-        self.current_position = np.array([40, height/2], dtype=np.float32)
+        # self.current_position = np.array([40, height/2], dtype=np.float32)
+
+        self.current_position = np.array([75, height-75], dtype=np.float32)
 
         # updating the initial orientation to 0 degree at 1st
         theta = math.radians(self.angle)
