@@ -11,16 +11,12 @@ from gymnasium.spaces import Discrete, Dict, Box
 from Agents.agent import Agent
 # from Agents.overlap_detection import detect_overlapping_points
 from Agents.RayCast import get_fov_rays
-from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_2_WALLS
+from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_4_WALLS
 from Walls.collision_detection import detect_collision
 from Walls.wall_class import Walls
 
 # env essentials import
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
-WALLS2 = LEVEL_2_WALLS
-
-WALLS2 = LEVEL_2_WALLS
 
 
 class GameEnv(Env):
@@ -57,6 +53,10 @@ class GameEnv(Env):
         self.predator_agent = Agent('predator', 0)
         self.predator_total_reward = 0
 
+        self.goal_coordinate = np.array([690, 110], dtype=np.float32)
+        self.goal_area = {'x': SCREEN_WIDTH - 150, 'y': 0, 'width': 150, 'height': 150}
+        self.total_seen = 0
+
         self.obs = None
 
         # start the tick timer
@@ -70,13 +70,11 @@ class GameEnv(Env):
         self.wall = Walls(pygame)
         self.walls = None
 
-        self.goal_seen = False
-
     def _flatten_list(self, nested_list):
         flattened_list = []
         for item in nested_list:
             if isinstance(item, list):
-                flattened_list.extend(self._flatten_list(item))
+                flattened_list.extend(self.flatten_list(item))
             else:
                 flattened_list.append(item)
         return flattened_list
@@ -85,47 +83,53 @@ class GameEnv(Env):
         observation = {
             "predator_position": self.predator_agent.current_position,
             "predator_angle": self.predator_agent.angle,
-            "destination_coordinates": None,  # need to send a np.array for the goal to reach,
+            "destination_coordinates": self.goal_coordinate,  # need to send a np.array for the goal to reach,
         }
-        # print(observation)
+
+        # print(f'observation:{observation}')
         return observation
 
     # to capture all the info
     def _get_info(self):
-        """
-            need to add some code to calculate the distance from agent center to goal (x,y)
-        """
+        distance = 10000
+        self.goal_seen = is_ray_blocked(self.predator_agent.current_position, self.goal_coordinate, self.walls)
+        if self.goal_seen:
+            direction = self.goal_coordinate - self.predator_agent.current_position
+            distance = np.linalg.norm(direction)
 
         info = {
             "goal_seen": self.goal_seen,
-            "distance": 450,
+            "distance": distance,
             "vision_blocked": not self.goal_seen,
         }
-
+        # print(f'info: {info}')
         return info
 
-    def get_reward(self, reward):
-        curve = -0.03
-        ascend = 0.02
+    def get_reward(self, reward, done):
+        curve = -0.09
+        ascend = 0.009
         clamp = 10
-
         reward = reward
         goal_coordinate = 0
         agent_pos = self.predator_agent.current_position
-        
-        if seen:
-            direction = goal_coordinate -
+
+        if is_ray_blocked(self.predator_agent.current_position, self.goal_coordinate, self.walls):
+            direction = np.abs(self.goal_coordinate - agent_pos)
             distance = np.linalg.norm(direction)
-            reward += ascend * np.exp(curve * distance) - clamp
+            reward += (ascend * np.exp(curve * distance) * clamp)
+            # print(f'distance:{distance}, reward: {reward}')
+            reward += 0.005
+            self.total_seen += 1
+            if self.total_seen == 1:
+                reward += 50
 
-        if agent_pos[0] > goal_coordinate[0] and agent_pos[1] < goal_coordinate[1]:
+        if agent_pos[0] > self.goal_area['x'] and agent_pos[1] < self.goal_area['height']:
             done = True
-            reward = 200
+            reward += 200
 
-        reward += 0.001
+        if self.walls
 
-        print(f'direction: {direction}, distance:{distance}, reward: {reward}')
-        return reward
+        return reward, done
 
     # the usual reset function
     def reset(self, seed=None, option=None):
@@ -133,13 +137,14 @@ class GameEnv(Env):
         self.start_time = time.time()
 
         self.wall.clear_walls()
-        self.walls = self.wall.make_wall(WALLS2)
+        self.walls = self.wall.make_wall(LEVEL_4_WALLS)
 
         self.total_steps = 0
         self.predator_total_reward = 0
+        self.total_seen = 0
 
         # for predator in self.predator_agents:
-        self.predator_agent.agent_reset(width=self.screen_width, height=self.screen_height, walls=self.walls)
+        self.predator_agent.agent_reset(width=self.screen_width, height=self.screen_height)
 
         # all the variable values inside the observation space needs to be sent inside the observation variable
         # for this level purpose we decided to add the dictionary observation
@@ -165,22 +170,11 @@ class GameEnv(Env):
         # observation needs to be set a dictionary
 
         self.total_steps += 1
-        reward = self.get_reward(reward)
-
-        if self.predator_agent.current_position[0] > self.walls[1].right:
-            reward += 100
-        # for wall in self.walls:
-        if self.predator_agent.current_position[0] > self._max_right():
-            reward += 200
-            done = True
+        reward, done = self.get_reward(reward, done)
 
         if elapsed_time >= self.total_running_time + 10:
             reward -= 100
             done = True
-        """
-        here lies the most important task
-        handling the rewards
-        """
 
         # getting observation and info
         observation = self._get_obs()
@@ -215,22 +209,18 @@ class GameEnv(Env):
         pygame.draw.circle(screen, RED, predator.center, predator.radius)
         pygame.draw.line(screen, RED, predator.center, predator.draw_direction_end, 5)
 
-        mid_point = 0
+        goalx, goaly = self.goal_coordinate
+        goalx, goaly = (int(goalx), int(goaly))
+        goal = (goalx, goaly)
+        pygame.draw.circle(screen, (255, 255, 50), goal, 40)
+        if self.goal_seen:
+            pygame.draw.line(screen, RED, predator.center, goal, 3)
 
-        if self.predator_agent.current_position[0] < self.walls[0].midbottom[0]:
-            mid_point = (np.array(self.walls[0].midbottom, dtype=np.float32) + np.array(self.walls[1].midtop,
-                                                                                        dtype=np.float32)) / 2
-            # print(f'mid point: {mid_point}')
-            direction = mid_point - self.predator_agent.current_position
+        pygame.draw.rect(screen, (200, 200, 50),
+                         (self.goal_area['x'], self.goal_area['y'], self.goal_area['width'], self.goal_area['height']),
+                         3)
 
-        if self.walls[0].right < self.predator_agent.current_position[0] < self.walls[2].midbottom[0]:
-            mid_point = (np.array(self.walls[2].midbottom, dtype=np.float32) + np.array(self.walls[3].midtop,
-                                                                                        dtype=np.float32)) / 2
-            direction = mid_point - self.predator_agent.current_position
-        mid_point = (int(mid_point[0]), int(mid_point[1]))
-        pygame.draw.line(screen, RED, predator.center, mid_point, 2)
-
-        for key, wall in WALLS2.items():
+        for key, wall in LEVEL_4_WALLS.items():
             pygame.draw.rect(screen, BLUE, (wall['x'], wall['y'], wall['width'], wall['height']))
 
         if self.render_mode == "human":

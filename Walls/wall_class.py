@@ -25,6 +25,12 @@ class Walls:
 
         return self.walls
 
+    def wall_crossed(self):
+        token = 0
+        for wall1, wall2 in zip(self.walls, self.walls):
+            if wall2.left - wall1.right == 100:
+                token =
+
     # destroys all the existing wall objects inside the walls list
     def clear_walls(self):
         self.walls = []

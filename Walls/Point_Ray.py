@@ -1,10 +1,14 @@
 
 def is_ray_blocked(agent_pos, goal, walls):
         point_visible = True  # Assume the point is initially visible
-        # list 
+
         ray_start = agent_pos
+
         x1, y1 = ray_start
+        x1, y1 = (int(x1), int(y1))
+
         x2, y2 = goal  # Endpoint of the ray is the special point
+        x2, y2 = (int(x2), int(y2))
 
         for wall in walls:
             wall_vertices = [wall.topleft, wall.topright, wall.bottomright, wall.bottomleft]
