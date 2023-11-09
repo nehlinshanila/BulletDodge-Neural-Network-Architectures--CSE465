@@ -57,3 +57,13 @@ LEVEL_4_WALLS = {
         '7': {'x': SCREEN_WIDTH - 105, 'y': 380, 'width': 110, 'height': 50, 'name': 'obs_w', 'gate_with' : 6, 'access' : 'bottom_top', 'orientation' : 'horizontal'}, 
     
 }
+
+
+# LEVEL_5_WALLS = {
+#     '1': {'x1': 200, 'y1': 0, 'x2': 200, 'y2': 150, 'name': 'obs_w', 'orientation': 'diagonal'},
+#     '2': {'x1': 200, 'y1': 150, 'x2': 400, 'y2': 150, 'name': 'obs_w', 'orientation': 'diagonal'},
+#     '3': {'x1': 400, 'y1': 150, 'x2': 400, 'y2': 0, 'name': 'obs_w', 'orientation': 'diagonal'},
+#     '4': {'x1': 400, 'y1': 0, 'x2': 200, 'y2': 0, 'name': 'obs_w', 'orientation': 'diagonal'},
+#     '5': {'x1': 250, 'y1': 100, 'x2': 350, 'y2': 100, 'name': 'obs_w', 'orientation': 'diagonal'},
+#     '6': {'x1': 350, 'y1': 100, 'x2': 350, 'y2': 50, 'name': 'obs_w', 'orientation': 'diagonal'},
+# }
