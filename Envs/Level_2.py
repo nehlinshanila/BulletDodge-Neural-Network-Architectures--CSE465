@@ -90,20 +90,20 @@ class GameEnv(Env):
         return observation
 
     # to capture all the info
-    def _get_info(self):
-        distance = 10000
-        self.goal_seen = is_ray_blocked(self.predator_agent.current_position, self.goal_coordinate, self.walls)
-        if self.goal_seen:
-            direction = self.goal_coordinate - self.predator_agent.current_position
-            distance = np.linalg.norm(direction)
-
-        info = {
-            "goal_seen": self.goal_seen,
-            "distance": distance,
-            "vision_blocked": not self.goal_seen,
-        }
-        # print(f'info: {info}')
-        return info
+    # def _get_info(self):
+    #     distance = 10000
+    #     self.goal_seen = is_ray_blocked(self.predator_agent.current_position, self.goal_coordinate, self.walls)
+    #     if self.goal_seen:
+    #         direction = self.goal_coordinate - self.predator_agent.current_position
+    #         distance = np.linalg.norm(direction)
+    #
+    #     info = {
+    #         "goal_seen": self.goal_seen,
+    #         "distance": distance,
+    #         "vision_blocked": not self.goal_seen,
+    #     }
+    #     # print(f'info: {info}')
+    #     return info
 
     def get_reward(self, reward, done):
         curve = -0.09
@@ -113,21 +113,21 @@ class GameEnv(Env):
         goal_coordinate = 0
         agent_pos = self.predator_agent.current_position
 
-        if is_ray_blocked(self.predator_agent.current_position, self.goal_coordinate, self.walls):
-            direction = np.abs(self.goal_coordinate - agent_pos)
-            distance = np.linalg.norm(direction)
-            reward += (ascend * np.exp(curve * distance) * clamp)
-            # print(f'distance:{distance}, reward: {reward}')
-            reward += 0.005
-            self.total_seen += 1
-            if self.total_seen == 1:
-                reward += 50
+        # if is_ray_blocked(self.predator_agent.current_position, self.goal_coordinate, self.walls):
+        #     direction = np.abs(self.goal_coordinate - agent_pos)
+        #     distance = np.linalg.norm(direction)
+        #     reward += (ascend * np.exp(curve * distance) * clamp)
+        #     # print(f'distance:{distance}, reward: {reward}')
+        #     reward += 0.005
+        #     self.total_seen += 1
+        #     if self.total_seen == 1:
+        #         reward += 50
 
         if agent_pos[0] > self.goal_area['x'] and agent_pos[1] < self.goal_area['height']:
             done = True
             reward += 200
 
-        if self.walls
+        # if self.walls
 
         return reward, done
 

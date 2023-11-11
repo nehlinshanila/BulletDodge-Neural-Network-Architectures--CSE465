@@ -4,7 +4,6 @@ this part is only to handle the wall buildings and destruction when necessary
 we've used pygame.Rect function to build the wall rectangles
 """
 
-
 class Walls:
     def __init__(self, pygame):
         self.pygame = pygame
