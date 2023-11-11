@@ -1,17 +1,13 @@
 import numpy as np
 import math
 
-import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
 
 class Bullet:
     def __init__(self, x, y, angle):
         self.width = 2
         self.height = 5
         self.angle = angle
-        self.speed = 5
+        self.speed = 1.7
         # self.screen = screen
         self.pos_x = x
         self.pos_y = y

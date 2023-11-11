@@ -69,11 +69,11 @@ LEVEL_4_WALLS = {
 # }
 
 LEVEL_5_WALLS = {
-    "1": {"x": 150, "y": 120, "width": 100, "height": 30, "name": "obs_w", "gate_with": 2, "access": "left_right", "orientation": "vertical"},
-    "2": {"x": 300, "y": 80, "width": 30, "height": 60 , "name": "obs_w", "gate_with": 3, "access": "left_right", "orientation": "horizontal"},
-    "3": {"x": 450,"y": 120,"width": 100,"height": 30,"name": "obs_w","gate_with": 4,"access": "bottom_top","orientation": "vertical"},
-    "4": {"x": 600,"y": 180,"width": 30,"height": 100,"name": "obs_w","gate_with": 4,"access": "bottom_top","orientation": "vertical"},
-    "5": {"x": 500,"y": 400,"width": 100,"height": 30,"name": "obs_w","gate_with": 9,"access": "top_bottom","orientation": "horizontal"},
-    "6": {"x": 150,"y": 250,"width": 30,"height": 200,"name": "obs_w","gate_with": 8,"access": "top_bottom","orientation": "horizontal"},
-    "7": {"x": 300,"y": 500,"width": 150,"height": 30,"name": "obs_w","gate_with": 8,"access": "top_bottom","orientation": "horizontal"}
+    "1": {"x": 150, "y": 120, "width": 100, "height": 30},
+    "2": {"x": 300, "y": 80,  "width": 30,  "height": 60},
+    "3": {"x": 450, "y": 120, "width": 100, "height": 30},
+    "4": {"x": 600, "y": 180, "width": 30,  "height": 100},
+    "5": {"x": 500, "y": 400, "width": 100, "height": 30},
+    "6": {"x": 150, "y": 250, "width": 30,  "height": 200},
+    "7": {"x": 300, "y": 500, "width": 150, "height": 30}
 }

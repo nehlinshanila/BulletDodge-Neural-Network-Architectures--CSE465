@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from bullets import Bullet
+from Entities.bullets import Bullet
 
 import os
 import sys
@@ -63,8 +63,10 @@ class Turret:
         return self.bullets
 
     def auto_destroy(self):
-        if self.bullets[0].pos[0] + 30 > self.width or self.bullets[0].pos[1] + 30 > self.height or \
-                self.bullets[0].pos[0] - 30 < 0 or self.bullets[0].pos[1] - 30 < 0:
+        if self.bullets[0].pos[0] + self.bullets[0].radius > self.width or \
+                self.bullets[0].pos[1] + self.bullets[0].radius > self.height or \
+                self.bullets[0].pos[0] - self.bullets[0].radius < 0 or \
+                self.bullets[0].pos[1] - self.bullets[0].radius < 0:
             self.destroy_bullet(self.bullets[0])
 
     def destroy_bullet(self, bullet):

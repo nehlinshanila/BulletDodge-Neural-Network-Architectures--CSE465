@@ -4,12 +4,11 @@ import time
 
 import numpy as np
 import pygame
-# import gymnasium as gym
 from gymnasium import Env
 from gymnasium.spaces import Discrete, Dict, Box
 
 from Agents.agent import Agent
-from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT
+from Constants.constants import WHITE, RED, BLUE, SCREEN_WIDTH, SCREEN_HEIGHT, LEVEL_5_WALLS
 from Walls.collision_detection import detect_collision
 from Walls.wall_class import Walls
 from Entities.turret import Turret
@@ -121,7 +120,7 @@ class GameEnv(Env):
         self.start_time = time.time()
 
         self.wall.clear_walls()
-        self.walls = self.wall.make_wall(LEVEL_4_WALLS)
+        self.walls = self.wall.make_wall(LEVEL_5_WALLS)
 
         self.total_steps = 0
         self.predator_total_reward = 0
@@ -208,7 +207,7 @@ class GameEnv(Env):
         if len(self.bullet) != 0:
             pygame.draw.circle(screen, (255, 255, 0), self.bullet[0].center, self.bullet.radius)
 
-        for key, wall in LEVEL_4_WALLS.items():
+        for key, wall in LEVEL_5_WALLS.items():
             pygame.draw.rect(screen, BLUE, (wall['x'], wall['y'], wall['width'], wall['height']))
 
         if self.render_mode == "human":
