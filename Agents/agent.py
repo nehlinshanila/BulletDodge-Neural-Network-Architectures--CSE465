@@ -13,7 +13,7 @@ class Agent:
         self.health = None
         self.isHit = False
         self.move = True
-        self.movement_speed = 1.00
+        self.movement_speed = 300
 
         # positional attributes
         self.previous_position = np.array([0, 0], dtype=np.float32)
