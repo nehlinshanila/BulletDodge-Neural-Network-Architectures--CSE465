@@ -7,7 +7,7 @@ class Bullet:
         self.width = 2
         self.height = 5
         self.angle = angle
-        self.speed = 1.7
+        self.speed = 500
         # self.screen = screen
         self.pos_x = x
         self.pos_y = y
@@ -18,24 +18,21 @@ class Bullet:
         # this rect object is for drawing
         # self.rect = pg.draw.circle(self.screen, RED, self.center, self.radius)
 
-    def move(self):
+    def move(self, speed_factor):
         angle = math.radians(self.angle)
-        # self.pos_x += self.speed * math.cos(angle)
-        # self.pos_y += self.speed * math.sin(angle)
-        # angle = self.angle
-        dir_end_x = self.pos[0] + self.speed * math.cos(angle)
-        dir_end_y = self.pos[1] + self.speed * math.sin(angle)
+        # if speed_factor != 0.0000:
+        #     self.speed = self.speed * speed_factor
+        # dir_end_x = self.pos[0] + self.speed * math.cos(angle)
+        # dir_end_y = self.pos[1] + self.speed * math.sin(angle)
+        displacement = np.array([
+            self.speed * speed_factor * math.cos(angle),
+            self.speed * speed_factor * math.sin(angle)
+        ], dtype=np.float32)
 
-        dir_end = np.array([dir_end_x, dir_end_y], dtype=np.float32)
-        direction = dir_end - self.pos
-        direction /= np.linalg.norm(direction)
+        # dir_end = np.array([dir_end_x, dir_end_y], dtype=np.float32)
+        # direction = dir_end - self.pos
+        # direction /= np.linalg.norm(direction)
 
-        # draw_dir_end = (int(dir_end_x), int(dir_end_y))
+        self.pos = self.pos + displacement
 
-        # self.angle = self.angle % 360
-
-        self.pos = self.pos + direction * self.speed
-        # pos = (self.pos[0], self.pos[1])
         self.center = (int(self.pos[0]), int(self.pos[1]))
-
-        # self.rect = pg.draw.circle(self.screen, RED, self.center, self.radius)
