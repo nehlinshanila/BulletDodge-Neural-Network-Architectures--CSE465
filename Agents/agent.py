@@ -95,7 +95,7 @@ class Agent:
         self.draw_direction_end = (center[0] + directional_vector_x, center[1] + directional_vector_y)
 
     # for updating the states of the agent when called
-    def step_update(self, action, range_x, range_y):
+    def step_update(self, action, speed_factor, range_x, range_y):
 
         # ! if used directional rotational movement
         # rotate clockwise
@@ -113,7 +113,8 @@ class Agent:
 
         # move front
         elif action == 2:
-            self.current_position = self.current_position + self.direction * self.movement_speed
+
+            self.current_position = self.current_position + self.direction * self.movement_speed * speed_factor
             # self.get_direction()
 
         # move back
