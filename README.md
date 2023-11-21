@@ -12,7 +12,7 @@ Incentive: This study is for our Neural Network final project of CSE465 course. 
 <img src="Envs/IMAGES/new_rays.jpg" height="190em"><img src="Envs/IMAGES/rotational.jpg" height="190em"><img src="Envs/IMAGES/rays.jpg" height="190em"> 
 </p>
 <p>
-In this 2D reinforcement learning setting, depicted in Figures 1 and 2 [DIRECTIONAL_MOVEMENT.ipynb] and 2 [ROTATIONAL_MOVEMENT.ipynb], our RL agent interacts with a turret and obstacles, aiming to dodge bullets and reach the turret for successful completion. 
+In this 2D reinforcement learning setting, depicted in Figures 1 and 3 [DIRECTIONAL_MOVEMENT.ipynb] and 2 [ROTATIONAL_MOVEMENT.ipynb], our RL agent interacts with a turret and obstacles, aiming to dodge bullets and reach the turret for successful completion. 
 The virtual environment is crucial, accurately simulating bullet trajectories, turret firing patterns, and wall interactions. The algorithmic approach involves employing 
 Deep Q Networks (DQN) as the primary reinforcement learning algorithm, known for its effectiveness in handling complex state spaces. The state representation includes the agent's position, 
 bullet position, turret position, and ray casts for spatial awareness. These elements are transmitted to the model after being flattened into a list. The action space is tailored for specific 
