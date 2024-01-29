@@ -1,6 +1,6 @@
 <h2 align="center"> Bullet Dodge: An Environment For Testing The Impact Of Different Neural Architectures :space_invader: </h2>
 <p>
-This project explores a reinforcement learning <strong>RL</strong> agent in the dynamic environment named "Bullet Dodge". It examines
+This project explores a deep reinforcement learning <strong>RL</strong> agent in the dynamic environment named "Bullet Dodge". It examines
 the impact of environmental complexities, rule modifications, and neural network architectures. The carefully crafted environment, 
   featuring dynamic bullet trajectories, spatial awareness and strategic turret engagement, served as a challenging arena for our agent to learn optimal strategies. This work emphasizes 
 adapting to unpredictable scenarios through incorporating randomness in obstacle placement and delves deeper into diverse neural 
